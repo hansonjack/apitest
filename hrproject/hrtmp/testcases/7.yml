@@ -1,0 +1,32 @@
+config:
+  base_url: http://192.168.50.34:18081
+  export: []
+  name: 测试环境
+  variables:
+    clientType: mch
+    gztest_url: http://192.168.50.34:18081
+    phone: 098630001
+    url: https://postman-echo.com
+  verify: false
+teststeps:
+- extract:
+    token: body.datas.token
+  name: 获取公共token
+  request:
+    headers: {}
+    method: POST
+    params:
+      clientType: $clientType
+      phone: $phone
+      timeStamp: ${get_timestamp()}
+    url: /api/public/token/getSignToken
+  setup_hooks: []
+  teardown_hooks: []
+  validate:
+  - eq:
+    - status_code
+    - 200
+  - eq:
+    - body.code
+    - 200
+  variables: {}

@@ -1,0 +1,34 @@
+config:
+  base_url: https://postman-echo.com
+  export: []
+  name: get with params
+  variables:
+    expect_foo1: config_bar1
+    expect_foo2: config_bar2
+    foo1: config_bar1
+    foo2: config_bar2
+  verify: false
+teststeps:
+- extract:
+    body.args.foo1: bar1
+    body.args.sum_v: '3'
+    foo3: body.args.foo2
+  name: get with params
+  request:
+    headers: {}
+    method: GET
+    params:
+      foo1: $foo1
+      foo2: $foo2
+      sum_v: $sum_v
+    url: /get
+  setup_hooks: []
+  teardown_hooks: []
+  validate:
+  - eq:
+    - status_code
+    - 200
+  variables:
+    foo1: bar1
+    foo2: bar2
+    sum_v: ${sum_two(1, 2)}

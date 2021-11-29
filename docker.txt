@@ -1,0 +1,19 @@
+docker run --name beauty_db --restart=always \
+-v /root/data:/var/lib/mysql \
+-p 23306:3306 \
+-e MYSQL_ROOT_PASSWORD=123456 -d mysql:8.0
+
+docker run --name api --restart=always \
+-v /root/img:/usr/src/app/img \
+-p 5000:5000 \
+-d api:1.1
+
+docker run --name web --restart=always \
+-p 3000:3000 \
+-d web:1.1
+
+
+create database `PearAdminFlask` character set utf8 collate utf8_general_ci;
+
+
+ docker run --name api --restart=always -v /root/api/apitest:/usr/src/app -p 5000:5000 -d api:2.3

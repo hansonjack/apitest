@@ -1,0 +1,27 @@
+config:
+  base_url: https://postman-echo.com
+  export: []
+  name: test2
+  variables:
+    foo1: test1
+    foo2: test2
+    sum_v: ${sum_two(1, 2)}
+  verify: false
+teststeps:
+- extract: {}
+  name: get with params
+  request:
+    headers:
+      content_type: application/x-www-form-urlencoded
+    method: GET
+    params:
+      foo1: $foo1
+      foo3: test1
+    url: /get
+  setup_hooks: []
+  teardown_hooks: []
+  validate:
+  - eq:
+    - status_code
+    - 200
+  variables: {}
