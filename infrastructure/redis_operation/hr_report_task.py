@@ -109,7 +109,7 @@ def pop_report_task():
         print (task_type, task,type(task))
         report_key = task_type.split('-')
         if task.get('batch_url'):
-            outprint = subprocess.run(["allure", "generate", task['report_path'],"-o",task['batch']],stdout=subprocess.PIPE)
+            outprint = subprocess.run(["allure", "generate", task['report_path'],"-o",task['batch'],"--clean"],stdout=subprocess.PIPE)
         u = 'http://192.168.50.129:5000/report/v1/reports'
         d = {
             'name':task['name'],

@@ -7,6 +7,7 @@ from itertools import chain
 from datetime import datetime, date
 from config import Config
 import os
+import time
 
 class ExpandJsonEncoder(json.JSONEncoder):
     '''
@@ -100,6 +101,8 @@ def push_hr_task(project_id,testcase_id,task_dic,debug=1):
     key = 'hr-'+str(project_id)+'-'+str(testcase_id) +'-' +str(debug)
     redis_queue.push_task(key=key,tasks=[task_dic])
     task_dic['key'] = key
+    log_key = 'log-'+str(project_id)+'-'+str(testcase_id)
+    task_dic['log_key'] = log_key
     return task_dic
 
 def pop_hr_task(project_id_and_testcase_id_lst):
@@ -113,3 +116,25 @@ def pop_hr_task(project_id_and_testcase_id_lst):
         print (task_type, task)
         time.sleep(1)
     
+
+def push_test_task():
+    '''
+    params task_dic = {'report_path':xx,'ymlpath':'xx','name':'xxx'.'log_path':''}
+    '''
+    redis_queue = MyRedisQueue()
+    key = '1a-1-1-0'
+    value = '8/logs/dsafaf.run.log'
+    redis_queue.push_task(key=key,tasks=[value])
+    k = 'logs-'+key
+    redis_queue.redis_connect.set(k,value,ex=60)
+    
+    return k
+
+def get_log(key):
+    redis_queue = MyRedisQueue()
+    while True:
+        if redis_queue.redis_connect.get(key):
+            value = redis_queue.redis_connect.get(key)
+            return value
+        time.sleep(10)
+        return

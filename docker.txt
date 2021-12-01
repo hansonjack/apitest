@@ -16,4 +16,11 @@ docker run --name web --restart=always \
 create database `PearAdminFlask` character set utf8 collate utf8_general_ci;
 
 
- docker run --name api --restart=always -v /root/api/apitest:/usr/src/app -p 5000:5000 -d api:2.3
+docker run --name api --restart=always -v /root/api/apitest:/usr/src/app -v /root/api/hrpoject:/usr/src/hrporject -p 5000:5000 -d api:2.3
+docker run --name api --restart=always -v /root/api/apitest:/usr/src/app -v /usr/src/hrporject -p 5000:5000 -d api:2.4
+docker run --name htask --restart=always --volumes-from api -d ht:2.5 #这样会把api所有挂载目录都共享到htask中
+docker run --name hreport --restart=always --volumes-from api \
+-v /root/api/nginx/nginx.conf:/etc/nginx/nginx.conf \
+-v /root/api/nginx/mime.types:/etc/nginx/mime.types \
+-p 8096:80 \
+-d nginx:stable-alpine

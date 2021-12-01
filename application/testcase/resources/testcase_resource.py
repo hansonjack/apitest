@@ -141,7 +141,7 @@ class TestcaseRunWithCommandResource(Resource):
     def post(self):
         testcase_controller = TestcaseController()
         data = request.get_json(force=True)
-        run_resp = copy.deepcopy(response)
+        run_resp = copy.deepcopy(response)       
         try:
             hr_project_path,yml_path,config_name,task_info = testcase_controller.hr_testcase_with_run(data)
             report_name = task_info['name']+'.html'
@@ -178,7 +178,7 @@ class TestcaseRunsResource(Resource):
         run_resp = copy.deepcopy(response)
         try:
             hr_project_path,yml_paths,task_info = testcase_controller.hr_testcases(data['selectedItems'],data['env'],data['project_id'])
-            
+            run_resp['data'] = task_info
             return run_resp
         except TestcaseException as e:
             run_resp['status'] = 409
@@ -239,4 +239,5 @@ class TestcaseTeststepDetailResource(Resource):
             return testcase_response
         except Exception as e:
             testcase_response['status'] = 500
-            testcase_response['msg'] = handle_m
+            testcase_response['msg'] = handle_message(e)
+            return testcase_response

@@ -124,22 +124,22 @@ def pop_hr_task():
         report_path1 = task['report_path']
         report_path2 = os.path.join(report_path1,name)
         
-        ymls = ' '.join(task['ymlpath'])
-        print(ymls)
+        print(task['ymlpath'])
         if task_key[2]=='all':
-            outprint = subprocess.run(["hrun", ymls, "-s","--alluredir=%s"%report_path1],stdout=subprocess.PIPE)
+            outprint = subprocess.run(["hrun", "-s","--alluredir=%s"%report_path1]+task['ymlpath'],stdout=subprocess.PIPE)
             batch = os.path.join(report_path1,'batch')
             if not os.path.isdir(batch):
                 os.makedirs(batch)
             task['batch'] = batch
             task['batch_url'] = '/'.join(task['report_url'].split('/')[:-1]) + '/batch/index.html'
         else:
-            outprint = subprocess.run(["hrun", ymls, "-s","--html=%s"%report_path2],stdout=subprocess.PIPE)
+            outprint = subprocess.run(["hrun", task['ymlpath'], "-s","--html=%s"%report_path2],stdout=subprocess.PIPE)
         print('=================================88888888888888888888888888888888888888888888888888888888888888888888')
         print(outprint.args)
         log_path = task['log_path']
         try:
             case_id = re.findall(r"case_id:(.*)",str_decode(outprint.stdout))
+            print(case_id[0].strip())
         except:
             case_id = None
         if case_id:
@@ -150,7 +150,7 @@ def pop_hr_task():
             case_id = ''
             log_path = ''
             log_name = ''
-        print(case_id[0].strip())
+        
         print('=================================')
         time.sleep(1)
         print(task_key[3])

@@ -114,20 +114,31 @@ class TestcaseController:
             export = export + hr_export(teststep.get('extract'))
             tmp = db2web_data(teststep)
             teststeps.append(hr_teststep(tmp))
-          
+        ##前端若在API页面新增或修改时,run，则要上传is_teststep字段
+        testcase_id = data.get('id') #这里获取到的可能时testcaseid或teststepid
+        is_teststep = data.get('is_teststep')
+        if is_teststep:
+            teststeps.append(hr_teststep(data))
+            testcase_id = None ##若是前端API编辑室时，会有id上传，故把testcaseid重置为none
+        rand_str = time.strftime("%Y%m%d%H%M%S", time.localtime()) + str(random.randint(1,1000))
+        
+        if testcase_id:
+            testcase_name = 'testcase_'+str(data['id']) + '_' +rand_str
+        else:
+            if is_teststep:
+                testcase_name = 'teststep_'+rand_str
+            else:
+                testcase_name = 'testcase_new_'+rand_str  
+        log_name =  testcase_name
         hr_config_data = {
             'name': data['name'], 
             'variables': list2dict(config.get('variables')),
             'base_url': config['base_url'], 
             'verify': False, 
-            'export': export
+            'export': export,
+            'log_name': log_name
             }
-        rand_str = time.strftime("%Y%m%d%H%M%S", time.localtime()) + str(random.randint(1,1000))
-        testcase_id = data.get('id')
-        if testcase_id:
-            testcase_name = 'testcase_'+str(data['id']) + '_' +rand_str
-        else:
-            testcase_name = 'testcase_new_'+rand_str 
+        
             
         hr_paths = ProjectController().hrproject_paths(int(data['project_id']))
         yml_path = os.path.join(hr_paths['hr_testcases'],testcase_name+'.yml')
@@ -140,7 +151,7 @@ class TestcaseController:
         if  debugtalk and debugtalk.get('debugtalktext'):
             debugtalk_controller.save_debugtalk_to_pyfile(debugtalk.get('debugtalktext'),debugtalk_path)
         report_url = str(data['project_id']) + '/reports/' + testcase_name + '.html'
-        log_url = str(data['project_id']) + '/logs/' + 'test.log'
+        log_url = str(data['project_id']) + '/logs/' + log_name + '.run.log'
         yml_url = str(data['project_id']) + '/testcases/' + testcase_name + '.yml'
         debugtalk_url = str(data['project_id']) + '/debugtalk.py'
         ##推送yml到redis
@@ -154,7 +165,8 @@ class TestcaseController:
             'report_url':report_url,
             'log_url':log_url,
             'yml_url':yml_url,
-            'debugtalk_url':debugtalk_url
+            'debugtalk_url':debugtalk_url,
+            'log_name':log_name
         }
         
         print('====================555555555555555555555555555555555')
@@ -171,7 +183,7 @@ class TestcaseController:
         print(task_info)
         return hr_paths['hr_root'],yml_path,config['name'],task_info
 
-    def hr_testcase(self,testcase,env):
+    def hr_testcase(self,testcase,env,log_name):
         config_id = env
         config_controller = ConfigController()
         config = config_controller.get_config(config_id).as_json()
@@ -189,7 +201,8 @@ class TestcaseController:
             'variables': list2dict(config.get('variables')),
             'base_url': config['base_url'], 
             'verify': False, 
-            'export': export
+            'export': export,
+            'log_name':log_name
             }
         
     
@@ -208,20 +221,24 @@ class TestcaseController:
         time.sleep(1)
         yml_paths = []
         yml_urls = []
+        log_urls = []
+        log_names = []
         hr_paths = ProjectController().hrproject_paths(int(project))
         for i in testcases:
-            hr_config_data,teststeps = self.hr_testcase(i,env)
             rand_str = time.strftime("%Y%m%d%H%M%S", time.localtime()) + str(random.randint(1,1000))
-            testcase_name = 'testcase_' + str(i['id']) + '_' + rand_str
+            testcase_name = 'testcase_' + str(i['id'])
+            log_name = testcase_name + '_' + rand_str
+            hr_config_data,teststeps = self.hr_testcase(i,env,log_name)
             yml_path = os.path.join(hr_paths['hr_testcases'],testcase_name+'.yml')
             yml_urls.append(str(project)+'/testcases/'+ testcase_name+'.yml' )
+            log_urls.append(str(project) + '/logs/' + log_name + '.run.log')
+            log_names.append(log_name)
             hr_yml(yml_path,hr_config_data,teststeps)
             yml_paths.append(yml_path)
             
         print(yml_paths)
         ##推送yml到redis
-        report_url = str(project) + '/reports/' + 'batch_run_' + rand_str +'.html'
-        log_url = str(project) + '/logs/' + 'test.log'
+        report_url = str(project) + '/reports/' + 'batch/html/index.html'
         debugtalk_url = str(project) + '/debugtalk.py'
         ##推送yml到redis
         task = {
@@ -232,7 +249,8 @@ class TestcaseController:
             'config_name':config['name'],
             'debugtalk':debugtalk.get('debugtalktext'),
             'report_url':report_url,
-            'log_url':log_url,
+            'log_urls':log_urls,
+            'log_names':log_names,
             'yml_urls':yml_urls,
             'debugtalk_url':debugtalk_url
         }

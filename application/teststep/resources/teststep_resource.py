@@ -305,11 +305,11 @@ class RunTestcaseResource(Resource):
             return run_teststep_resp
         except TeststepException as e:
             run_teststep_resp['status'] = 409
-            run_teststep_resp['msg'] = handle_message(e)
+            run_teststep_resp['msg'] = e
             return run_teststep_resp
         except Exception as e:
             run_teststep_resp['status'] = 500
-            run_teststep_resp['msg'] = handle_message(e)
+            run_teststep_resp['msg'] = e
             return run_teststep_resp
         
 
